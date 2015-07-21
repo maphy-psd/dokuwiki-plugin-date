@@ -1,7 +1,7 @@
 base   date
 author Marcel Pietschmann
 email  mpietsch@astro.physik.uni-potsdam.de
-date   2014-12-02
+date   2015-02-08
 name   date plugin
 desc   Wrapper about the php command strftime and date
 url    http://dokuwiki.org/plugin:date

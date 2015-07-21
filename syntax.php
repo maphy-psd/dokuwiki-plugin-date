@@ -46,15 +46,17 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
     /**
      * Connect pattern to lexer
      */
-    function connectTo($mode) { $this->Lexer->addSpecialPattern('{{date>.+?}}',$mode,'plugin_date'); }
-    function connectTo($mode) { $this->Lexer->addSpecialPattern('{{.+?}}',$mode,'plugin_date'); }
+    function connectTo($mode) { 
+        $this->Lexer->addSpecialPattern('{{date>.+?}}',$mode,'plugin_date');
+        $this->Lexer->addSpecialPattern('<<.+?>>',$mode,'plugin_date');
+    }
  
     /**
      * Handle the match
      */
     function handle($match, $state, $pos, &$handler){
-        
-        if (!strstr("date>", $match)) {
+
+        if (strpos($match,'date>',2) !== false) {
             // strip markup
             $match = substr($match,7,-2);
             // Get the key values pairs        
@@ -65,13 +67,14 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             
             // handle key=value
             $replacers = $this->_GetKeyValues($replacers);
+            
+            $cnst = null;
         } else {
             // strip markup
-            $match_var = substr($match, 2, -2); 
+            // $cnst = array();
+            $cnst = substr($match, 2, -2); 
         }
-        
-        return array($dataformat,$replacers,$match_var);
-        
+        return array($dataformat,$replacers,$cnst); 
     }
  
     /**
@@ -80,22 +83,31 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
     function render($mode, &$renderer, $data) {
         // for XHTML output
         if ($mode == 'xhtml') {
-            
+
+            // format for the output
             $format = $data[0];
 
             // Check if some keys are set -> array has length greater than 0
             if (count($data[1]) > 0) {
+
                 // search the keys in array and get position in array
                 $timestamp_key = array_search("timestamp",$data[1]['keys']);
                 $now_key = array_search("now",$data[1]['keys']);
                 $locale_key = array_search("locale",$data[1]['keys']);
                 $mode_key = array_search("mode",$data[1]['keys']);
+                // $cnst = NULL;
             } else {
+            
             // set null values for correct going
-                $timestamp_key = NULL;
-                $now_key = NULL;
-                $locale_key = NULL;
-                $mode_key = NULL;
+                $timestamp_key = null;
+                $now_key = null;
+                $locale_key = null;
+                $mode_key = null;
+                    if ($data[2] === '') {
+                        $cnst = null;
+                    } else {
+                        $cnst = $data[2];
+                    }              
             }
             
             // set locale LC_TIME setting, if some locale key is giving
@@ -114,16 +126,16 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             } else {
                 $mode_value = "strftime";
             }
-            
-            // check for the different posibilities
-            if ($timestamp_key !== false and $now_key !== false) {
+
+            // check for the different possibilities
+            if (is_null($timestamp_key) !== true and is_null($now_key) !== true and is_null($cnst) == true) {
                 // timestamp and now keys are set
                 
                 // get values from array
                 $timestamp_value = $data[1]['vals'][$timestamp_key];
                 $now_value = $data[1]['vals'][$now_key];
                 
-                // replace " witch ' for correct eval
+                // replace " with ' for correct eval
                 $timestamp_value = str_replace('"',"'",$timestamp_value);
                 $now_value = str_replace('"',"'",$now_value);
                 
@@ -147,7 +159,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_with_now_value);
                     }
                 
-            } else if ($timestamp_key !== false) {
+            } else if (is_null($timestamp_key) !== true and is_null($cnst) == true) {
                 // only timestamp key is set
                 
                 // get values from array
@@ -164,7 +176,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_value);
                     }
                 
-            } else {
+            } else if (is_null($cnst) == true) {
                 // no keys are set
                 // do the magic date function
                 if ($mode_value == "date") {
@@ -174,22 +186,54 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                     }
                 
             }
-                      
-            switch ($meta) {
-                case 'DATE':
-                    $xhtml   = strftime($conf['dformat']);
-                    $nocache = true;
-                    break;
-                case 'YEAR':
-                    $xhtml = date('Y');
-                    break;
-                case 'MONTH':
-                    $xhtml = date('m');
-                    break;
-                case 'DAY':
-                    $xhtml   = date('d');
-                    $nocache = true;
-                    break;
+            
+            if ($cnst !== null) {
+
+                // handle with the constants
+                switch ($cnst) {
+                    case 'DATE':
+                    case 'date':
+                        $xhtml = strftime("$conf['dformat']");
+                        break;
+                    case 'YEAR':
+                    case 'year':
+                        $xhtml = strftime('%Y');
+                        break;
+                    case 'MONTH':
+                    case 'month':
+                        $xhtml = strftime('%m'); 
+                        break;
+                    case 'WEEK':
+                    case 'week':
+                        $xhtml = strftime('%W'); 
+                        break;
+                    case 'DAY2':
+                    case 'day2':
+                    case 'DAY':
+                    case 'day':
+                        $xhtml = strftime('%d');
+                        break;
+                    case 'DAY1':
+                    case 'day1':
+                        $xhtml = strftime('%e');
+                        break;
+                    case 'DAYOFYEAR':
+                    case 'dayofyear':
+                        $xhtml = strftime('%j');
+                        break;
+                    case 'WEEKDAY':
+                    case 'weekday':
+                        $xhtml = strftime('%w');
+                        break;  
+                    case 'TIME':
+                    case 'time':
+                        $xhtml = strftime('%T');
+                        break;
+                    default:
+                        // for unknown match render original
+                        $xhtml = "@{$cnst}@";
+                        break;
+                }
             }
             
             // unset cache, so that the page is always up to date
@@ -199,7 +243,6 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             
             // set locale LC_TIME setting to stored settings
             if (isset($locale_key)) {
-                $locale_value = $data[1]['vals'][$locale_key];
                 setlocale(LC_TIME,$localestore);
             }
             
