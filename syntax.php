@@ -8,7 +8,7 @@
  * {{date>format|key=val|key2=val|key3=val}}
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Marcel Pietschmann <mpietsch@astro.physik.uni-potsdam.de>
- * @version    0.95
+ * @version    1.00
  */
  
 // must be run within DokuWiki
