@@ -87,10 +87,10 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                 $mode_key = array_search("mode",$data[1]['keys']);
             } else {
             // set null values for correct going
-                $timestamp_key = NULL;
-                $now_key = NULL;
-                $locale_key = NULL;
-                $mode_key = NULL;
+                $timestamp_key = null;
+                $now_key = null;
+                $locale_key = null;
+                $mode_key = null;
             }
             
             // set locale LC_TIME setting, if some locale key is giving
@@ -111,7 +111,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             }
             
             // check for the different posibilities
-            if ($timestamp_key !== false and $now_key !== false) {
+            if (is_null($timestamp_key) !== true and is_null($now_key) !== true) {
                 // timestamp and now keys are set
                 
                 // get values from array
@@ -142,7 +142,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_with_now_value);
                     }
                 
-            } else if ($timestamp_key !== false) {
+            } else if (is_null($timestamp_key) !== true) {
                 // only timestamp key is set
                 
                 // get values from array
