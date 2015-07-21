@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Date: Run the php command strftime or date.
@@ -9,7 +8,7 @@
  * {{date>format|key=val|key2=val|key3=val}}
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Marcel Pietschmann <mpietsch@astro.physik.uni-potsdam.de>
- * @version    0.9
+ * @version    1.00
  */
  
 // must be run within DokuWiki
@@ -184,28 +183,59 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                     } else {
                         $xhtml = strftime($format);
                     }
-                
             }
             
             if ($cnst !== null) {
-
+                $dformat = $this->getConf('dpformat');
                 // handle with the constants
                 switch ($cnst) {
-                    case 'DATE':
-                    case 'date':
-                        $xhtml = strftime($conf['dformat']);
+                    case 'TODAY':
+                    case 'today':
+                        $xhtml = strftime($dformat);
+                        break;
+                    case 'TOMORROW':
+                    case 'tomorrow':
+                        $xhtml = strftime($dformat, strtotime("+1 day"));
+                        break;
+                    case 'YESTERDAY':
+                    case 'yesterday':
+                        $xhtml = strftime($dformat, strtotime("-1 day"));
                         break;
                     case 'YEAR':
                     case 'year':
                         $xhtml = strftime('%Y');
                         break;
+                    case 'NYEAR':
+                    case 'nyear':
+                        $xhtml = strftime('%Y',strtotime("+1 year"));
+                        break;
+                    case 'PYEAR':
+                    case 'pyear':
+                        $xhtml = strftime('%Y',strtotime("-1 year"));
+                        break;
                     case 'MONTH':
                     case 'month':
                         $xhtml = strftime('%m'); 
                         break;
+                    case 'PMONTH':
+                    case 'pmonth':
+                        $xhtml = strftime('%m',strtotime("-1 month"));
+                        break;
+                    case 'NMONTH':
+                    case 'nmonth':
+                        $xhtml = strftime('%m',strtotime("+1 month"));
+                        break;
                     case 'WEEK':
                     case 'week':
                         $xhtml = strftime('%W'); 
+                        break;
+                    case 'NWEEK':
+                    case 'nweek':
+                        $xhtml = strftime('%W',strtotime("+1 week"));
+                        break;
+                    case 'PWEEK':
+                    case 'pweek':
+                        $xhtml = strftime('%W',strtotime("-1 week"));
                         break;
                     case 'DAY2':
                     case 'day2':
