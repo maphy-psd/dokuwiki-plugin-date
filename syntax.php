@@ -47,25 +47,30 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) { $this->Lexer->addSpecialPattern('{{date>.+?}}',$mode,'plugin_date'); }
- 
+    function connectTo($mode) { $this->Lexer->addSpecialPattern('{{.+?}}',$mode,'plugin_date'); }
  
     /**
      * Handle the match
      */
     function handle($match, $state, $pos, &$handler){
         
-        // strip markup
-        $match = substr($match,7,-2);
-        // Get the key values pairs        
-        $replacers = preg_split('/(?<!\\\\)\|/', $match);       
+        if (!strstr("date>", $match)) {
+            // strip markup
+            $match = substr($match,7,-2);
+            // Get the key values pairs        
+            $replacers = preg_split('/(?<!\\\\)\|/', $match);       
+            
+            // cut format key
+            $dataformat = array_shift($replacers);
+            
+            // handle key=value
+            $replacers = $this->_GetKeyValues($replacers);
+        } else {
+            // strip markup
+            $match_var = substr($match, 2, -2); 
+        }
         
-        // cut format key
-        $dataformat = array_shift($replacers);
-        
-        // handle key=value
-        $replacers = $this->_GetKeyValues($replacers);
-        
-        return array($dataformat,$replacers);
+        return array($dataformat,$replacers,$match_var);
         
     }
  
@@ -77,7 +82,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
         if ($mode == 'xhtml') {
             
             $format = $data[0];
-            // print_r ($data);
+
             // Check if some keys are set -> array has length greater than 0
             if (count($data[1]) > 0) {
                 // search the keys in array and get position in array
@@ -87,10 +92,10 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                 $mode_key = array_search("mode",$data[1]['keys']);
             } else {
             // set null values for correct going
-                $timestamp_key = null;
-                $now_key = null;
-                $locale_key = null;
-                $mode_key = null;
+                $timestamp_key = NULL;
+                $now_key = NULL;
+                $locale_key = NULL;
+                $mode_key = NULL;
             }
             
             // set locale LC_TIME setting, if some locale key is giving
@@ -111,7 +116,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             }
             
             // check for the different posibilities
-            if (is_null($timestamp_key) !== true and is_null($now_key) !== true) {
+            if ($timestamp_key !== false and $now_key !== false) {
                 // timestamp and now keys are set
                 
                 // get values from array
@@ -142,7 +147,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_with_now_value);
                     }
                 
-            } else if (is_null($timestamp_key) !== true) {
+            } else if ($timestamp_key !== false) {
                 // only timestamp key is set
                 
                 // get values from array
@@ -169,6 +174,24 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                     }
                 
             }
+                      
+            switch ($meta) {
+                case 'DATE':
+                    $xhtml   = strftime($conf['dformat']);
+                    $nocache = true;
+                    break;
+                case 'YEAR':
+                    $xhtml = date('Y');
+                    break;
+                case 'MONTH':
+                    $xhtml = date('m');
+                    break;
+                case 'DAY':
+                    $xhtml   = date('d');
+                    $nocache = true;
+                    break;
+            }
+            
             // unset cache, so that the page is always up to date
             $renderer->info['cache'] = false;
             // print out the date
