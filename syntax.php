@@ -9,7 +9,7 @@
  * {{date>format|key=val|key2=val|key3=val}}
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Marcel Pietschmann <mpietsch@astro.physik.uni-potsdam.de>
- * @version    0.8
+ * @version    0.9
  */
  
 // must be run within DokuWiki
@@ -193,7 +193,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                 switch ($cnst) {
                     case 'DATE':
                     case 'date':
-                        $xhtml = strftime("$conf['dformat']");
+                        $xhtml = strftime($conf['dformat']);
                         break;
                     case 'YEAR':
                     case 'year':
