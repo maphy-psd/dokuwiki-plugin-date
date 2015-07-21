@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Date: Run the php command strftime or date.
