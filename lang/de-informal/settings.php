@@ -4,4 +4,4 @@
  *
  */
 
-$lang['dpformat']       = 'Datumsformat für die today, tomorrow und yesterday Konstanten (siehe PHPs <a href="http://www.php.net/strftime">strftime</a> Funktion)';
+$lang['dpformat']       = 'Datumsformat für die today, tomorrow und yesterday Konstanten (siehe PHP\'s <a href="http://www.php.net/strftime">strftime</a> Funktion)';
