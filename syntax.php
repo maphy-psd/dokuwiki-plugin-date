@@ -8,7 +8,7 @@
  * {{date>format|key=val|key2=val|key3=val}}
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Marcel Pietschmann <mpietsch@astro.physik.uni-potsdam.de>
- * @version    1.00
+ * @version    1.10
  */
  
 // must be run within DokuWiki
@@ -47,14 +47,14 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
      */
     function connectTo($mode) { 
         $this->Lexer->addSpecialPattern('{{date>.+?}}',$mode,'plugin_date');
-        $this->Lexer->addSpecialPattern('<<.+?>>',$mode,'plugin_date');
+        $this->Lexer->addSpecialPattern('{{date=.+?}}',$mode,'plugin_date');
     }
  
     /**
      * Handle the match
      */
     function handle($match, $state, $pos, Doku_Handler $handler){
-
+		//strip strings for non-constant
         if (strpos($match,'date>',2) !== false) {
             // strip markup
             $match = substr($match,7,-2);
@@ -69,9 +69,8 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             
             $cnst = null;
         } else {
-            // strip markup
-            // $cnst = array();
-            $cnst = substr($match, 2, -2); 
+            // strip markup for constanst
+            $cnst = substr($match, 7, -2); 
         }
         return array($dataformat,$replacers,$cnst); 
     }
