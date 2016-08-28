@@ -8,7 +8,7 @@
  * {{date>format|key=val|key2=val|key3=val}}
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Marcel Pietschmann <mpietsch@astro.physik.uni-potsdam.de>
- * @version    1.10
+ * @version    1.20
  */
  
 // must be run within DokuWiki
@@ -93,16 +93,15 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                 $now_key = array_search("now",$data[1]['keys']);
                 $locale_key = array_search("locale",$data[1]['keys']);
                 $mode_key = array_search("mode",$data[1]['keys']);
-                // $cnst = NULL;
+                $cnst = FALSE;
             } else {
-            
-            // set null values for correct going
-                $timestamp_key = null;
-                $now_key = null;
-                $locale_key = null;
-                $mode_key = null;
+            // set FALSE values for correct going
+                $timestamp_key = FALSE;
+                $now_key = FALSE;
+                $locale_key = FALSE;
+                $mode_key = FALSE;
                     if ($data[2] === '') {
-                        $cnst = null;
+                        $cnst = FALSE;
                     } else {
                         $cnst = $data[2];
                     }              
@@ -126,7 +125,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             }
 
             // check for the different possibilities
-            if (is_null($timestamp_key) !== true and is_null($now_key) !== true and is_null($cnst) == true) {
+            if ( $timestamp_key !== FALSE and $now_key !== FALSE and $cnst == FALSE ) {
                 // timestamp and now keys are set
                 
                 // get values from array
@@ -157,7 +156,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_with_now_value);
                     }
                 
-            } else if (is_null($timestamp_key) !== true and is_null($cnst) == true) {
+            } else if ( $timestamp_key !== FALSE and $cnst == FALSE ) {
                 // only timestamp key is set
                 
                 // get values from array
@@ -174,7 +173,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_value);
                     }
                 
-            } else if (is_null($cnst) == true) {
+            } else if ($cnst == FALSE) {
                 // no keys are set
                 // do the magic date function
                 if ($mode_value == "date") {
@@ -184,7 +183,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                     }
             }
             
-            if ($cnst !== null) {
+            if ($cnst != FALSE) {
                 $dformat = $this->getConf('dpformat');
                 // handle with the constants
                 switch ($cnst) {
