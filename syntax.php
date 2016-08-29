@@ -8,7 +8,7 @@
  * {{date>format|key=val|key2=val|key3=val}}
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Marcel Pietschmann <mpietsch@astro.physik.uni-potsdam.de>
- * @version    1.10
+ * @version    1.20
  */
  
 // must be run within DokuWiki
@@ -93,16 +93,15 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                 $now_key = array_search("now",$data[1]['keys']);
                 $locale_key = array_search("locale",$data[1]['keys']);
                 $mode_key = array_search("mode",$data[1]['keys']);
-                // $cnst = NULL;
+                $cnst = FALSE;
             } else {
-            
-            // set null values for correct going
-                $timestamp_key = null;
-                $now_key = null;
-                $locale_key = null;
-                $mode_key = null;
+            // set FALSE values for correct going
+                $timestamp_key = FALSE;
+                $now_key = FALSE;
+                $locale_key = FALSE;
+                $mode_key = FALSE;
                     if ($data[2] === '') {
-                        $cnst = null;
+                        $cnst = FALSE;
                     } else {
                         $cnst = $data[2];
                     }              
@@ -126,7 +125,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
             }
 
             // check for the different possibilities
-            if (is_null($timestamp_key) !== true and is_null($now_key) !== true and is_null($cnst) == true) {
+            if ( $timestamp_key !== FALSE and $now_key !== FALSE and $cnst == FALSE ) {
                 // timestamp and now keys are set
                 
                 // get values from array
@@ -157,7 +156,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_with_now_value);
                     }
                 
-            } else if (is_null($timestamp_key) !== true and is_null($cnst) == true) {
+            } else if ( $timestamp_key !== FALSE and $cnst == FALSE ) {
                 // only timestamp key is set
                 
                 // get values from array
@@ -174,7 +173,7 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                         $xhtml = strftime($format, $timestamp_value);
                     }
                 
-            } else if (is_null($cnst) == true) {
+            } else if ($cnst == FALSE) {
                 // no keys are set
                 // do the magic date function
                 if ($mode_value == "date") {
@@ -184,85 +183,47 @@ class syntax_plugin_date extends DokuWiki_Syntax_Plugin {
                     }
             }
             
-            if ($cnst !== null) {
+            if ($cnst != FALSE) {
                 $dformat = $this->getConf('dpformat');
                 // handle with the constants
-                switch ($cnst) {
-                    case 'TODAY':
-                    case 'today':
-                        $xhtml = strftime($dformat);
-                        break;
-                    case 'TOMORROW':
-                    case 'tomorrow':
-                        $xhtml = strftime($dformat, strtotime("+1 day"));
-                        break;
-                    case 'YESTERDAY':
-                    case 'yesterday':
-                        $xhtml = strftime($dformat, strtotime("-1 day"));
-                        break;
-                    case 'YEAR':
-                    case 'year':
-                        $xhtml = strftime('%Y');
-                        break;
-                    case 'NYEAR':
-                    case 'nyear':
-                        $xhtml = strftime('%Y',strtotime("+1 year"));
-                        break;
-                    case 'PYEAR':
-                    case 'pyear':
-                        $xhtml = strftime('%Y',strtotime("-1 year"));
-                        break;
-                    case 'MONTH':
-                    case 'month':
-                        $xhtml = strftime('%m'); 
-                        break;
-                    case 'PMONTH':
-                    case 'pmonth':
-                        $xhtml = strftime('%m',strtotime("-1 month"));
-                        break;
-                    case 'NMONTH':
-                    case 'nmonth':
-                        $xhtml = strftime('%m',strtotime("+1 month"));
-                        break;
-                    case 'WEEK':
-                    case 'week':
-                        $xhtml = strftime('%W'); 
-                        break;
-                    case 'NWEEK':
-                    case 'nweek':
-                        $xhtml = strftime('%W',strtotime("+1 week"));
-                        break;
-                    case 'PWEEK':
-                    case 'pweek':
-                        $xhtml = strftime('%W',strtotime("-1 week"));
-                        break;
-                    case 'DAY2':
-                    case 'day2':
-                    case 'DAY':
-                    case 'day':
-                        $xhtml = strftime('%d');
-                        break;
-                    case 'DAY1':
-                    case 'day1':
-                        $xhtml = strftime('%e');
-                        break;
-                    case 'DAYOFYEAR':
-                    case 'dayofyear':
-                        $xhtml = strftime('%j');
-                        break;
-                    case 'WEEKDAY':
-                    case 'weekday':
-                        $xhtml = strftime('%w');
-                        break;  
-                    case 'TIME':
-                    case 'time':
-                        $xhtml = strftime('%T');
-                        break;
-                    default:
-                        // for unknown match render original
-                        $xhtml = "@{$cnst}@";
-                        break;
-                }
+				if ( strcasecmp($cnst,'today') == 0 ) {
+					$xhtml = strftime($dformat);
+				} else if ( strcasecmp($cnst,'tomorrow') == 0 ) {
+					$xhtml = strftime($dformat, strtotime("+1 day"));
+				} else if ( strcasecmp($cnst,'yesterday') == 0 ) {
+					$xhtml = strftime($dformat, strtotime("-1 day"));
+				} else if ( strcasecmp($cnst,'year') == 0 ) {
+					$xhtml = strftime('%Y');
+				} else if ( strcasecmp($cnst,'nyear') == 0 ) {
+					$xhtml = strftime('%Y',strtotime("+1 year"));;
+				} else if ( strcasecmp($cnst,'pyear') == 0 ) {
+					$xhtml = strftime('%Y',strtotime("-1 year"));
+				} else if ( strcasecmp($cnst,'month') == 0 ) {
+					$xhtml = strftime('%m');
+				} else if ( strcasecmp($cnst,'nmonth') == 0 ) {
+					$xhtml = strftime('%m',strtotime("+1 month"));
+				} else if ( strcasecmp($cnst,'pmonth') == 0 ) {
+					$xhtml = strftime('%m',strtotime("-1 month"));
+				} else if ( strcasecmp($cnst,'week') == 0 ) {
+					$xhtml = strftime('%W'); 
+				} else if ( strcasecmp($cnst,'nweek') == 0 ) {
+					$xhtml = strftime('%W',strtotime("+1 week"));
+				} else if ( strcasecmp($cnst,'pweek') == 0 ) {
+					$xhtml = strftime('%W',strtotime("-1 week"));
+				} else if ( strcasecmp($cnst,'dayofmonth') == 0 ) {
+					$xhtml = strftime('%d');
+				} else if ( strcasecmp($cnst,'dayofmonth2') == 0 ) {
+					$xhtml = strftime('%e');
+				} else if ( strcasecmp($cnst,'dayofyear') == 0 ) {
+					$xhtml = strftime('%j');
+				} else if ( strcasecmp($cnst,'weekday') == 0 ) {
+					$xhtml = strftime('%w');
+				} else if ( strcasecmp($cnst,'time') == 0 ) {
+					$xhtml = strftime('%T');
+				} else {
+					// for unknown match render original
+                    $xhtml = "{date={$cnst}}";
+				}
             }
             
             // unset cache, so that the page is always up to date
